@@ -84,6 +84,20 @@ def cmd_lyrics(args):
     generate_lyrics(args.artist, args.mood, args.topic, args.bars)
 
 
+def cmd_prompts(args):
+    from tools.prompts import get_prompt, print_prompt, print_variations, GENRES
+    if args.genre is None or args.genre == "list":
+        print("\nAvailable genres:")
+        for key, g in GENRES.items():
+            print(f"  {key:<18} {g['bpm_range'][0]}-{g['bpm_range'][1]:>3}  {g['reference']}")
+        return
+    if args.variations > 1:
+        print_variations(args.genre, args.platform, args.vocal, args.variations)
+    else:
+        result = get_prompt(args.genre, args.platform, args.vocal, args.bpm, args.key)
+        print_prompt(result)
+
+
 def cmd_club(args):
     from tools.club_ready import process_club_ready, analyze_loudness
     import soundfile as sf_mod
@@ -175,6 +189,17 @@ Examples:
     sub_lyrics.add_argument("--topic", "-t", required=True, help="Song topic")
     sub_lyrics.add_argument("--bars", "-b", type=int, default=32)
 
+    # Prompts
+    sub_prompts = subparsers.add_parser("prompts", help="AI generation prompt library")
+    sub_prompts.add_argument("genre", nargs="?", default=None,
+                             choices=["tech-house", "deep-house", "melodic-house",
+                                      "afrobeats", "amapiano", "bass-house", "list"])
+    sub_prompts.add_argument("--platform", "-p", default="suno", choices=["suno", "udio"])
+    sub_prompts.add_argument("--vocal", "-v", action="store_true")
+    sub_prompts.add_argument("--bpm", "-b", type=int, default=None)
+    sub_prompts.add_argument("--key", "-k", default=None)
+    sub_prompts.add_argument("--variations", "-n", type=int, default=1)
+
     # Club-ready
     sub_club = subparsers.add_parser("club", help="Club-ready processing (Summit-style)")
     sub_club.add_argument("input", help="Audio file to process")
@@ -224,6 +249,7 @@ Examples:
         "analyze": cmd_analyze,
         "vocal": cmd_vocal,
         "lyrics": cmd_lyrics,
+        "prompts": cmd_prompts,
         "club": cmd_club,
         "house": cmd_house,
     }
