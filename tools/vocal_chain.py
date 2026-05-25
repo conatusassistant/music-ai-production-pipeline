@@ -52,8 +52,8 @@ def preset_drake() -> Pedalboard:
     return Pedalboard([
         HighpassFilter(cutoff_frequency_hz=80),      # Remove rumble
         LowShelfFilter(cutoff_frequency_hz=200, gain_db=2.0),  # Warmth
-        PeakFilter(center_frequency_hz=3000, gain_db=2.5, q=1.0),  # Presence
-        PeakFilter(center_frequency_hz=6000, gain_db=-1.5, q=1.0),  # De-harsh
+        PeakFilter(cutoff_frequency_hz=3000, gain_db=2.5, q=1.0),  # Presence
+        PeakFilter(cutoff_frequency_hz=6000, gain_db=-1.5, q=1.0),  # De-harsh
         Compressor(
             threshold_db=-18,
             ratio=4.0,
@@ -83,8 +83,8 @@ def preset_weeknd() -> Pedalboard:
     return Pedalboard([
         HighpassFilter(cutoff_frequency_hz=90),
         LowShelfFilter(cutoff_frequency_hz=250, gain_db=1.5),
-        PeakFilter(center_frequency_hz=2500, gain_db=3.0, q=0.8),  # Forward vocal
-        PeakFilter(center_frequency_hz=5000, gain_db=-2.0, q=1.0),  # Dark character
+        PeakFilter(cutoff_frequency_hz=2500, gain_db=3.0, q=0.8),  # Forward vocal
+        PeakFilter(cutoff_frequency_hz=5000, gain_db=-2.0, q=1.0),  # Dark character
         Compressor(
             threshold_db=-20,
             ratio=3.5,
@@ -113,8 +113,8 @@ def preset_nav() -> Pedalboard:
     Simple chain, not too processed, monotone-friendly."""
     return Pedalboard([
         HighpassFilter(cutoff_frequency_hz=100),
-        PeakFilter(center_frequency_hz=2000, gain_db=2.0, q=1.0),
-        PeakFilter(center_frequency_hz=4000, gain_db=1.5, q=1.0),
+        PeakFilter(cutoff_frequency_hz=2000, gain_db=2.0, q=1.0),
+        PeakFilter(cutoff_frequency_hz=4000, gain_db=1.5, q=1.0),
         Compressor(
             threshold_db=-16,
             ratio=3.0,
@@ -142,8 +142,8 @@ def preset_travis() -> Pedalboard:
     Heavy effects, aggressive compression, lots of reverb and delay."""
     return Pedalboard([
         HighpassFilter(cutoff_frequency_hz=80),
-        PeakFilter(center_frequency_hz=1500, gain_db=3.0, q=0.7),   # Midrange aggression
-        PeakFilter(center_frequency_hz=4000, gain_db=2.0, q=1.0),   # Cut through
+        PeakFilter(cutoff_frequency_hz=1500, gain_db=3.0, q=0.7),   # Midrange aggression
+        PeakFilter(cutoff_frequency_hz=4000, gain_db=2.0, q=1.0),   # Cut through
         Compressor(
             threshold_db=-22,
             ratio=6.0,          # Heavy compression
@@ -177,8 +177,8 @@ def preset_don_toliver() -> Pedalboard:
     return Pedalboard([
         HighpassFilter(cutoff_frequency_hz=85),
         LowShelfFilter(cutoff_frequency_hz=200, gain_db=2.5),  # Warm low end
-        PeakFilter(center_frequency_hz=2800, gain_db=3.5, q=0.8),  # Vocal presence
-        PeakFilter(center_frequency_hz=7000, gain_db=-1.0, q=1.0),
+        PeakFilter(cutoff_frequency_hz=2800, gain_db=3.5, q=0.8),  # Vocal presence
+        PeakFilter(cutoff_frequency_hz=7000, gain_db=-1.0, q=1.0),
         Compressor(
             threshold_db=-20,
             ratio=4.5,
@@ -251,7 +251,7 @@ def process_vocals(input_file: str, preset_name: str, output_file: str = None):
 
     print(f"Processing: {path.name}")
     print(f"Preset: {preset_desc}")
-    print(f"Chain: {' → '.join(type(effect).__name__ for effect in board)}")
+    print(f"Chain: {' > '.join(type(effect).__name__ for effect in board)}")
     print()
 
     with AudioFile(str(path)) as f:
