@@ -84,6 +84,23 @@ def cmd_lyrics(args):
     generate_lyrics(args.artist, args.mood, args.topic, args.bars)
 
 
+def cmd_club(args):
+    from tools.club_ready import process_club_ready, analyze_loudness
+    import soundfile as sf_mod
+    if args.analyze_only:
+        audio, sr = sf_mod.read(args.input, dtype='float32')
+        if audio.ndim > 1:
+            audio = audio.T
+        else:
+            audio = audio[np.newaxis, :]
+        stats = analyze_loudness(audio, sr)
+        print(f"Analysis: {args.input}")
+        for k, v in stats.items():
+            print(f"  {k}: {v}")
+        return
+    process_club_ready(args.input, args.target, args.bpm, args.sidechain, args.output)
+
+
 def cmd_house(args):
     from tools.house import print_structure, generate_beat, chop_vocal, cmd_full
     if args.house_command == "structure":
@@ -158,6 +175,15 @@ Examples:
     sub_lyrics.add_argument("--topic", "-t", required=True, help="Song topic")
     sub_lyrics.add_argument("--bars", "-b", type=int, default=32)
 
+    # Club-ready
+    sub_club = subparsers.add_parser("club", help="Club-ready processing (Summit-style)")
+    sub_club.add_argument("input", help="Audio file to process")
+    sub_club.add_argument("--target", "-t", default="club", choices=["club", "streaming"])
+    sub_club.add_argument("--bpm", "-b", type=float, default=None)
+    sub_club.add_argument("--sidechain", "-s", action="store_true")
+    sub_club.add_argument("--output", "-o", default=None)
+    sub_club.add_argument("--analyze-only", "-a", action="store_true")
+
     # House
     sub_house = subparsers.add_parser("house", help="House music production toolkit")
     house_sub = sub_house.add_subparsers(dest="house_command")
@@ -198,6 +224,7 @@ Examples:
         "analyze": cmd_analyze,
         "vocal": cmd_vocal,
         "lyrics": cmd_lyrics,
+        "club": cmd_club,
         "house": cmd_house,
     }
 
