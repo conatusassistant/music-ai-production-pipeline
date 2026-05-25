@@ -1,0 +1,9 @@
+matchering>=0.14.0
+demucs>=4.0.0
+librosa>=0.10.0
+numpy>=1.24.0
+matplotlib>=3.7.0
+soundfile>=0.12.0
+pedalboard>=0.9.0
+anthropic>=0.39.0
+lyricsgenius>=3.0.0

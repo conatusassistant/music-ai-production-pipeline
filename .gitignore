@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+separated/
+*.wav
+*.mp3
+*.flac
+*_analysis.png
+lyrics_*.txt
+analysis_results.json
+venv/
+.venv/
