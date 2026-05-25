@@ -1,13 +1,4 @@
-"""
-OS Music Pipeline — Tool #6: House Music Production Toolkit
-Generate house/tech-house track structures, vocal chops, and beat patterns.
-
-Usage:
-    python tools/house.py structure --style tech-house --bpm 126
-    python tools/house.py chop vocals.wav --slices 8
-    python tools/house.py kick --bpm 126 --duration 30
-    python tools/house.py full --bpm 126 --style tech-house --vocal vocals.wav
-"""
+"""House music production toolkit: kick/hat synthesis, vocal chops, arrangement structures."""
 
 import argparse
 import sys
@@ -219,13 +210,7 @@ def chop_vocal(input_file: str, num_slices: int = 8, output_dir: str = None) -> 
         duration_ms = len(chunk) / sr * 1000
         print(f"  chop_{i+1:02d}.wav  ({duration_ms:.0f}ms)")
 
-    print(f"\n{num_slices} chops saved to: {output_dir}/")
-    print("\nUsage in FL Studio:")
-    print("  - Load chops into Slicex or DirectWave")
-    print("  - Map to piano roll keys")
-    print("  - Sequence rhythmically over your kick pattern")
-    print("  - Add reverb/delay to taste")
-
+    print(f"{num_slices} chops saved to: {output_dir}/")
     return chop_files
 
 
@@ -249,12 +234,7 @@ def generate_beat(bpm: float, duration_sec: float, style: str, output_file: str 
         output_file = f"beat_{style}_{int(bpm)}bpm.wav"
 
     sf.write(output_file, mixed, sr)
-    print(f"Saved: {output_file}")
-    print(f"  Style: {style_info['reference_artists']}")
-    print(f"  Key suggestion: {style_info['key_suggestion']}")
-    print(f"\nThis is a foundation beat (kick + hats).")
-    print("Add bass, synths, and vocals in FL Studio.")
-
+    print(f"Saved: {output_file} ({style}, {int(bpm)} BPM)")
     return output_file
 
 
@@ -313,21 +293,7 @@ def cmd_full(bpm: float, style: str, vocal_file: str = None, sr: int = 44100):
         print()
         chop_vocal(vocal_file, num_slices=8)
 
-    print("\n" + "=" * 65)
-    print("  NEXT STEPS")
-    print("=" * 65)
-    print("  1. Open FL Studio")
-    print(f"  2. Set project BPM to {bpm}")
-    print(f"  3. Load {beat_file} as your rhythm foundation")
-    if vocal_file:
-        print(f"  4. Load vocal chops into Slicex")
-        print(f"  5. Sequence chops over the beat in piano roll")
-    else:
-        print(f"  4. Record a short vocal phrase (2-4 words) into SM7B")
-        print(f"  5. Run: python tools/house.py chop your_vocal.wav --slices 8")
-    print(f"  6. Add bass synth in {style_info['key_suggestion']}")
-    print(f"  7. Arrange following the structure above")
-    print(f"  8. Master: python os_pipeline.py master final.wav --ref john_summit_ref.wav")
+    print(f"\nDone. Beat: {beat_file}")
 
 
 def main():

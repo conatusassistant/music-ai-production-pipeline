@@ -1,19 +1,4 @@
-"""
-OS Music Pipeline — Tool #8: AI Generation Prompt Library
-Optimized prompts for Suno v5.5 and Udio, tuned to avoid AI slop.
-Based on Beatport Top 100 analysis (May 2026): 127-132 BPM, minor keys.
-
-Usage:
-    python tools/prompts.py tech-house
-    python tools/prompts.py tech-house --vocal
-    python tools/prompts.py afrobeats
-    python tools/prompts.py amapiano
-    python tools/prompts.py deep-house
-    python tools/prompts.py melodic-house
-    python tools/prompts.py list
-    python tools/prompts.py tech-house --platform udio
-    python tools/prompts.py tech-house --variations 5
-"""
+"""AI generation prompt library for Suno/Udio, tuned from Beatport Top 100 data."""
 
 import argparse
 import random
@@ -223,14 +208,6 @@ def print_prompt(result: dict):
     for tip in result["tips"]:
         print(f"    - {tip}")
     print()
-    print("=" * 70)
-    print()
-    print("  AFTER GENERATING:")
-    print("    1. Generate 10-20 variations, pick the best 2-3")
-    print("    2. Export stems from Suno Studio (Pro/Premier)")
-    print("    3. Import stems into FL Studio, swap weak elements")
-    print("    4. Process: python os_pipeline.py club track.wav --target club")
-    print(f"    5. Master: python os_pipeline.py master track.wav --ref summit_ref.wav")
     print("=" * 70)
 
 

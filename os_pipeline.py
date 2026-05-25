@@ -1,19 +1,9 @@
-"""
-OS Music Pipeline — Main CLI
-Your AI producer. One command to master, separate, analyze, process, or write.
-
-Usage:
-    python os_pipeline.py master track.wav --ref drake_ref.wav
-    python os_pipeline.py separate song.mp3
-    python os_pipeline.py analyze song.wav
-    python os_pipeline.py vocal track.wav --preset weeknd
-    python os_pipeline.py lyrics --artist drake --mood introspective --topic "late night"
-    python os_pipeline.py setup                              # Install all dependencies
-"""
+"""OS Music Pipeline CLI. Master, separate, analyze, process, and generate music."""
 
 import argparse
 import subprocess
 import sys
+import numpy as np
 
 
 def cmd_setup(args):

@@ -1,20 +1,6 @@
 """
-OS Music Pipeline — Tool #9: AI Music Generation
-Generate tracks via Suno API (cookie auth) or Google Lyria 3 (API key).
-Falls back to local synthesis if no credentials available.
-
-Usage:
-    # With Suno (set SUNO_COOKIE env var first):
-    python tools/generate.py --suno "tech house, punchy kicks, 128 BPM" --count 5
-
-    # With Google Lyria 3 (set GOOGLE_API_KEY env var first):
-    python tools/generate.py --lyria "driving tech house, 128 BPM, F minor"
-
-    # Local synthesis (no credentials needed):
-    python tools/generate.py --local --style tech-house --bpm 128
-
-    # Full pipeline: generate + process + master
-    python tools/generate.py --suno "tech house, 128 BPM" --pipeline --ref reference.wav
+OS Music Pipeline -- AI Music Generation
+Generate tracks via Suno API, Google Lyria 3, or local synthesis.
 """
 
 import argparse
@@ -30,63 +16,8 @@ except ImportError:
     print("Required: pip install numpy soundfile")
     sys.exit(1)
 
-
-# ============================================================
-# LOCAL SYNTHESIS ENGINE
-# Generates a complete house track locally (kick + hat + bass + pad + structure)
-# Not AI — pure synthesis. But it's a real, playable beat.
-# ============================================================
-
-def synth_kick(sr, bpm, duration_sec, character="punchy"):
-    total = int(sr * duration_sec)
-    output = np.zeros(total)
-    beat = int(sr * 60.0 / bpm)
-    kick_len = int(sr * 0.25)
-
-    params = {
-        "punchy": (160, 40, 0.15, 0.8),
-        "warm": (140, 35, 0.2, 0.4),
-        "hard": (200, 45, 0.12, 1.0),
-    }
-    f_start, f_end, decay, click_amt = params.get(character, params["punchy"])
-
-    t = np.linspace(0, 0.25, kick_len, endpoint=False)
-    freq_env = f_end + (f_start - f_end) * np.exp(-t * 30)
-    phase = 2 * np.pi * np.cumsum(freq_env) / sr
-    kick_wave = np.sin(phase) * np.exp(-t / decay)
-    click = np.random.randn(kick_len) * np.exp(-t * 200) * click_amt * 0.3
-    kick_single = (kick_wave + click) * 0.8
-
-    pos = 0
-    while pos + kick_len < total:
-        end = min(pos + kick_len, total)
-        output[pos:end] += kick_single[:end - pos]
-        pos += beat
-    return output
-
-
-def synth_hihat(sr, bpm, duration_sec, pattern="offbeat"):
-    total = int(sr * duration_sec)
-    output = np.zeros(total)
-    eighth = int(sr * 60.0 / bpm / 2)
-    hat_len = int(sr * 0.04)
-    t = np.linspace(0, 0.04, hat_len, endpoint=False)
-    hat = np.random.randn(hat_len) * np.exp(-t * 100) * 0.25
-
-    if pattern == "offbeat":
-        pos = eighth
-        while pos + hat_len < total:
-            output[pos:pos + hat_len] += hat
-            pos += eighth * 2
-    elif pattern == "sixteenth":
-        pos = 0
-        i = 0
-        while pos + hat_len < total:
-            vel = [0.5, 0.3, 0.7, 0.3][i % 4]
-            output[pos:pos + hat_len] += hat * vel
-            pos += eighth
-            i += 1
-    return output
+# Import shared synthesis from house.py (single source of truth for kick/hat)
+from tools.house import generate_kick, generate_hihat
 
 
 def synth_clap(sr, bpm, duration_sec):
@@ -194,25 +125,15 @@ def generate_local_track(style: str, bpm: int, duration_sec: int, output: str = 
     bass_root, pad_root = key_freqs.get(style, (55.0, 220.0))
 
     kick_char = {"tech-house": "punchy", "deep-house": "warm", "bass-house": "hard"}.get(style, "punchy")
+    hat_pattern = {"tech-house": "offbeat", "deep-house": "shuffled", "bass-house": "driving"}.get(style, "offbeat")
 
-    # Generate each element
-    print("  Synthesizing kick...")
-    kick = synth_kick(sr, bpm, duration_sec, kick_char)
-
-    print("  Synthesizing hi-hats...")
-    hats = synth_hihat(sr, bpm, duration_sec, "offbeat")
-
-    print("  Synthesizing clap...")
+    # Generate each element (kick/hat from house.py, bass/clap/pad local)
+    kick = generate_kick(bpm, duration_sec, sr, kick_char)
+    hats = generate_hihat(bpm, duration_sec, sr, hat_pattern)
     clap = synth_clap(sr, bpm, duration_sec)
-
-    print("  Synthesizing bass...")
     bass = synth_bass(sr, bpm, duration_sec, bass_root, "rolling")
-
-    print("  Synthesizing pad...")
     pad = synth_pad(sr, bpm, duration_sec, pad_root)
-
-    # Add 16th note hats layer (quieter)
-    hats16 = synth_hihat(sr, bpm, duration_sec, "sixteenth")
+    hats16 = generate_hihat(bpm, duration_sec, sr, "driving")
 
     # === ARRANGEMENT ===
     # Create energy envelope: intro builds, drop full, break strips, drop2 full, outro fades
@@ -263,14 +184,7 @@ def generate_local_track(style: str, bpm: int, duration_sec: int, output: str = 
 
     sf.write(output, mixed, sr)
 
-    print(f"\n  Output: {output}")
-    print(f"  Duration: {duration_sec}s")
-    print(f"  Elements: kick + hats + clap + rolling bass + pad")
-    print(f"  Structure: intro(20%) > build(10%) > drop(25%) > break(10%) > drop2(20%) > outro(15%)")
-    print(f"\n  This is local synthesis — not AI-generated.")
-    print(f"  For AI quality, set SUNO_COOKIE or GOOGLE_API_KEY.")
-    print(f"\n  Next: python os_pipeline.py club {output} --target club --sidechain --bpm {bpm}")
-
+    print(f"  Output: {output}")
     return output
 
 
@@ -283,16 +197,7 @@ def generate_suno(prompt: str, count: int = 2, instrumental: bool = True,
     """Generate tracks using Suno API (requires SUNO_COOKIE)."""
     cookie = os.environ.get("SUNO_COOKIE")
     if not cookie:
-        print("Error: SUNO_COOKIE not set.")
-        print()
-        print("To get your Suno cookie:")
-        print("  1. Go to https://app.suno.ai and sign in")
-        print("  2. Press F12 (Developer Tools)")
-        print("  3. Go to Network tab, refresh the page")
-        print("  4. Search for 'client?_clerk_js_version'")
-        print("  5. Click it > Headers > find 'Cookie' in Request Headers")
-        print("  6. Copy the ENTIRE cookie value")
-        print("  7. Run: export SUNO_COOKIE='your_cookie_here'")
+        print("Error: SUNO_COOKIE not set. Export it from your Suno session.")
         sys.exit(1)
 
     try:
@@ -304,9 +209,6 @@ def generate_suno(prompt: str, count: int = 2, instrumental: bool = True,
     Path(output_dir).mkdir(exist_ok=True)
 
     print(f"Generating {count} tracks with Suno...")
-    print(f"  Prompt: {prompt}")
-    print(f"  Instrumental: {instrumental}")
-    print()
 
     client = Suno(cookie=cookie)
 
@@ -322,7 +224,7 @@ def generate_suno(prompt: str, count: int = 2, instrumental: bool = True,
         print(f"  [{i+1}/{len(songs)}] Downloaded: {filepath}")
         downloaded.append(str(filepath))
 
-    print(f"\n  {len(downloaded)} tracks saved to: {output_dir}/")
+    print(f"{len(downloaded)} tracks saved to: {output_dir}/")
     return downloaded
 
 
@@ -334,12 +236,7 @@ def generate_lyria(prompt: str, output: str = None):
     """Generate a track using Google Lyria 3 (requires GOOGLE_API_KEY)."""
     api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
-        print("Error: GOOGLE_API_KEY not set.")
-        print()
-        print("To get a free Google API key:")
-        print("  1. Go to https://aistudio.google.com/apikey")
-        print("  2. Click 'Create API Key'")
-        print("  3. Run: export GOOGLE_API_KEY='your_key_here'")
+        print("Error: GOOGLE_API_KEY not set. Get one at https://aistudio.google.com/apikey")
         sys.exit(1)
 
     try:
@@ -353,8 +250,6 @@ def generate_lyria(prompt: str, output: str = None):
         output = f"lyria_{safe_prompt}.mp3"
 
     print(f"Generating with Google Lyria 3...")
-    print(f"  Prompt: {prompt}")
-    print()
 
     client = genai.Client(api_key=api_key)
 

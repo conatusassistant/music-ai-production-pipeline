@@ -1,16 +1,4 @@
-"""
-OS Music Pipeline — Tool #5: Vocal Processing Chain
-One-command vocal processing: EQ, compression, reverb, delay.
-Presets for Drake, Weeknd, Nav, Don Toliver, Travis Scott styles.
-
-Usage:
-    python tools/vocal_chain.py vocals.wav --preset drake
-    python tools/vocal_chain.py vocals.wav --preset weeknd
-    python tools/vocal_chain.py vocals.wav --preset nav
-    python tools/vocal_chain.py vocals.wav --preset travis
-    python tools/vocal_chain.py vocals.wav --preset don-toliver
-    python tools/vocal_chain.py vocals.wav --preset raw      # Minimal processing
-"""
+"""Vocal processing chain with artist-style presets (Drake, Weeknd, Nav, Travis, Don Toliver)."""
 
 import argparse
 import sys
@@ -269,13 +257,6 @@ def process_vocals(input_file: str, preset_name: str, output_file: str = None):
         f.write(processed)
 
     print(f"  Output: {output_file}")
-    print()
-    print("Done! Compare the original and processed files side by side.")
-    print()
-    print("Next steps:")
-    print("  - Layer this with autotune (GSnap in FL Studio)")
-    print("  - Add ad-libs on a separate track with more reverb/delay")
-    print("  - Stack doubles slightly panned L/R for width")
 
 
 def process_all_presets(input_file: str):

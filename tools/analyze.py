@@ -1,13 +1,4 @@
-"""
-OS Music Pipeline — Tool #3: Audio Analysis Engine
-X-ray any song's DNA: BPM, key, frequency spectrum, energy curve, spectral features.
-
-Usage:
-    python tools/analyze.py song.wav                       # Full analysis + charts
-    python tools/analyze.py song.wav --no-plot             # Analysis without charts
-    python tools/analyze.py song.wav --compare ref.wav     # Compare two tracks
-    python tools/analyze.py folder/ --batch                # Analyze all songs in folder
-"""
+"""Audio analysis: BPM, key, frequency spectrum, energy, spectral features."""
 
 import argparse
 import json
@@ -34,33 +25,23 @@ def analyze_track(filepath: str, plot: bool = True) -> dict:
         sys.exit(1)
 
     print(f"Analyzing: {path.name}")
-    print("Loading audio...")
 
-    # Load audio
     y, sr = librosa.load(str(path), sr=None)
     duration = librosa.get_duration(y=y, sr=sr)
 
-    print(f"  Duration: {duration:.1f}s ({duration/60:.1f} min)")
-    print(f"  Sample rate: {sr} Hz")
-    print()
-
-    # === BPM / Tempo ===
-    print("Detecting tempo...")
+    # BPM
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
     if hasattr(tempo, '__len__'):
         tempo = float(tempo[0])
     else:
         tempo = float(tempo)
-    print(f"  BPM: {tempo:.1f}")
 
-    # === Key Detection ===
-    print("Detecting key...")
+    # Key Detection
     chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
     chroma_avg = np.mean(chroma, axis=1)
     key_idx = int(np.argmax(chroma_avg))
     key_name = KEY_NAMES[key_idx]
 
-    # Detect major vs minor using correlation with key profiles
     major_profile = np.array([6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88])
     minor_profile = np.array([6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17])
 
@@ -69,10 +50,8 @@ def analyze_track(filepath: str, plot: bool = True) -> dict:
 
     mode = "major" if major_corr > minor_corr else "minor"
     key_full = f"{key_name} {mode}"
-    print(f"  Key: {key_full}")
 
-    # === Spectral Analysis ===
-    print("Analyzing frequency spectrum...")
+    # Spectral Analysis
     spectral_centroid = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
     spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr, roll_percent=0.85)[0]
     spectral_bandwidth = librosa.feature.spectral_bandwidth(y=y, sr=sr)[0]
@@ -81,28 +60,11 @@ def analyze_track(filepath: str, plot: bool = True) -> dict:
     avg_rolloff = float(np.mean(spectral_rolloff))
     avg_bandwidth = float(np.mean(spectral_bandwidth))
 
-    print(f"  Spectral centroid (brightness): {avg_centroid:.0f} Hz")
-    print(f"  Spectral rolloff (85%): {avg_rolloff:.0f} Hz")
-    print(f"  Spectral bandwidth: {avg_bandwidth:.0f} Hz")
-
-    # 40's underwater detection
-    if avg_centroid < 2000:
-        print(f"  >> LOW centroid — this has 40's 'underwater' quality")
-    elif avg_centroid < 3000:
-        print(f"  >> MODERATE brightness — warm/dark production")
-    else:
-        print(f"  >> HIGH brightness — crisp/bright production")
-
-    # === RMS Energy (Dynamics) ===
-    print("Analyzing dynamics...")
+    # RMS Energy
     rms = librosa.feature.rms(y=y)[0]
     rms_mean = float(np.mean(rms))
     rms_std = float(np.std(rms))
     dynamic_range = float(np.max(rms) - np.min(rms))
-
-    print(f"  Average energy: {rms_mean:.4f}")
-    print(f"  Energy variation: {rms_std:.4f}")
-    print(f"  Dynamic range: {dynamic_range:.4f}")
 
     # === Zero Crossing Rate (texture) ===
     zcr = librosa.feature.zero_crossing_rate(y=y)[0]

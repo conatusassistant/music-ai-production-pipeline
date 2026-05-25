@@ -1,25 +1,4 @@
-"""
-OS Music Pipeline — Tool #10: Artist Style Fingerprinting
-Analyze multiple tracks from any artist and extract their production DNA.
-Then apply that fingerprint as a processing target to YOUR tracks.
-
-This is the future: instead of guessing EQ settings, you feed it 10 John Summit
-tracks and it extracts his exact spectral profile, compression character,
-loudness target, and arrangement patterns. Then it makes YOUR track sound like his.
-
-Usage:
-    # Build a fingerprint from reference tracks:
-    python tools/fingerprint.py build summit_tracks/ --name "john-summit"
-
-    # Apply a fingerprint to your track:
-    python tools/fingerprint.py apply my_track.wav --fingerprint john-summit
-
-    # Compare your track against a fingerprint:
-    python tools/fingerprint.py compare my_track.wav --fingerprint john-summit
-
-    # List saved fingerprints:
-    python tools/fingerprint.py list
-"""
+"""Artist style fingerprinting: extract production DNA from reference tracks, apply to yours."""
 
 import argparse
 import json

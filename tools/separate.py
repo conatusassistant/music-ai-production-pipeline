@@ -1,13 +1,4 @@
-"""
-OS Music Pipeline — Tool #2: Stem Separation (Demucs)
-Rip any song into vocals, drums, bass, and other stems.
-
-Usage:
-    python tools/separate.py song.mp3                     # Full 4-stem separation
-    python tools/separate.py song.mp3 --vocals-only       # Just vocals + instrumental
-    python tools/separate.py song.mp3 -o stems_folder     # Custom output directory
-    python tools/separate.py folder_of_songs/              # Batch process a folder
-"""
+"""Stem separation via Demucs. Splits audio into vocals, drums, bass, and other."""
 
 import argparse
 import subprocess
@@ -65,30 +56,15 @@ def separate_track(input_path: str, output_dir: str = None, vocals_only: bool = 
 
 def _run_separation(cmd: list, filename: str):
     print(f"Separating: {filename}")
-    print(f"  This may take 1-5 minutes depending on song length and your hardware.")
-    print(f"  (GPU accelerated if CUDA available)")
-    print()
 
     try:
         process = subprocess.run(cmd, text=True)
         if process.returncode == 0:
-            print(f"Done! Stems saved for: {filename}")
-            print()
-            print("Output stems:")
-            print("  vocals.wav    — Isolated vocal track")
-            print("  drums.wav     — Drums and percussion")
-            print("  bass.wav      — Bass line")
-            print("  other.wav     — Everything else (synths, pads, fx)")
-            print()
-            print("Use cases:")
-            print("  - Study 40's instrumental by removing Drake's vocals")
-            print("  - Grab drum patterns from Travis Scott tracks")
-            print("  - Sing over the instrumental of any song")
-            print("  - Analyze vocal delivery in isolation")
+            print(f"Done: {filename} > vocals.wav, drums.wav, bass.wav, other.wav")
         else:
-            print(f"Error processing {filename}. Check that demucs is installed: pip install demucs")
+            print(f"Error processing {filename}. Run: pip install demucs")
     except FileNotFoundError:
-        print("demucs not found. Install with: pip install demucs")
+        print("demucs not found. Run: pip install demucs")
         sys.exit(1)
 
 

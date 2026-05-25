@@ -1,12 +1,4 @@
-"""
-OS Music Pipeline — Tool #1: Reference Mastering
-Uses matchering to master your track against a reference (Drake, Weeknd, etc.)
-
-Usage:
-    python tools/master.py my_raw_mix.wav --ref drake_reference.wav
-    python tools/master.py my_raw_mix.wav --ref weeknd_reference.wav -o mastered_output.wav
-    python tools/master.py my_raw_mix.wav --ref nav_reference.wav --format mp3
-"""
+"""Reference mastering via matchering. Matches EQ, loudness, and dynamics to a reference track."""
 
 import argparse
 import sys
@@ -54,15 +46,7 @@ def master_track(target: str, reference: str, output: str = None, fmt: str = "wa
         results=results,
     )
 
-    print(f"Done! Mastered file: {out_file}")
-    print()
-    print("What happened:")
-    print("  - Analyzed the frequency spectrum of your reference track")
-    print("  - Matched your track's EQ curve to the reference")
-    print("  - Matched loudness (LUFS) to the reference")
-    print("  - Applied limiting to prevent clipping")
-    print()
-    print("Tip: Use a lossless (.wav/.flac) reference for best results.")
+    print(f"Done: {out_file}")
 
 
 def main():

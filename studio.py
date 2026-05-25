@@ -1,28 +1,4 @@
-"""
-OS Music Pipeline — STUDIO
-The future of music production: one conversation, one track.
-
-This is what music production looks like in 2031, built today.
-No DAW menus. No plugin chains. No manual processing. You describe, it produces.
-
-Usage:
-    python studio.py "dark tech house like John Summit, 128 BPM"
-    python studio.py "afrobeats banger, Rema style, 108 BPM, party anthem"
-    python studio.py "moody R&B, Weeknd vibes, about driving at 2AM"
-    python studio.py --interactive    # Conversational mode
-
-What happens:
-    1. Parses your intent (genre, style, mood, BPM, key)
-    2. Generates optimized prompts for Suno/Udio
-    3. Generates track (Suno API / local synthesis fallback)
-    4. Analyzes the output
-    5. Applies style fingerprint if available
-    6. Processes through club-ready chain
-    7. Masters against reference profile
-    8. Outputs a release-ready file
-
-One command. Raw idea to finished track.
-"""
+"""OS Studio: describe a track in natural language, get a finished file."""
 
 import argparse
 import os
@@ -108,7 +84,7 @@ def parse_intent(description: str) -> dict:
         "don toliver": "don-toliver",
     }
     for keyword, ref in artist_keywords.items():
-        if keyword in desc_lower:
+        if keyword in desc_lower and ref not in style_refs:
             style_refs.append(ref)
 
     # Detect vocal preference
@@ -291,13 +267,6 @@ def run_studio(description: str, output_dir: str = "output"):
     print(f"  Output: {final_file}")
     print(f"  Genre:  {intent['genre']} | BPM: {prompt_result['bpm']} | Key: {prompt_result['key']}")
     print(f"  Target: {intent['target']}")
-    print()
-    print("  To iterate:")
-    print(f"    python studio.py \"{description}, but with more bass\"")
-    print(f"    python studio.py \"{description}, darker, less reverb\"")
-    print()
-    print("  To release:")
-    print(f"    Upload {final_file} to DistroKid ($22/year)")
     print("=" * 70)
 
     return final_file

@@ -1,21 +1,4 @@
-"""
-OS Music Pipeline — Tool #7: Club-Ready Processing
-Bridges the gap between bedroom production and club-quality sound.
-Implements the specific techniques that John Summit's engineer (Luca Pretolesi) uses.
-
-What this does:
-  1. Mono bass management (everything below 150Hz summed to mono)
-  2. Sidechain-style ducking (the "pump" that makes tech house groove)
-  3. Multi-stage saturation (John Summit's signature: Decapitator + Saturn approach)
-  4. Mastering chain: corrective EQ > compression > tonal EQ > saturation > limiting
-  5. LUFS targeting for club play (-8 to -9 LUFS) vs streaming (-14 LUFS)
-
-Usage:
-    python tools/club_ready.py track.wav --target club
-    python tools/club_ready.py track.wav --target streaming
-    python tools/club_ready.py track.wav --target club --sidechain --bpm 126
-    python tools/club_ready.py track.wav --analyze-only
-"""
+"""Club-ready processing: mono bass, sidechain pump, saturation, mastering chain."""
 
 import argparse
 import sys
@@ -281,7 +264,7 @@ def process_club_ready(input_file: str, target: str = "club", bpm: float = None,
         try:
             audio = mono_bass(audio, sr, crossover_hz=150.0)
         except ImportError:
-            print("    scipy not installed, skipping mono bass. Install with: pip install scipy")
+            print("    WARNING: scipy required for mono bass. Run: pip install scipy")
     else:
         print("  [1/4] Mono input, skipping stereo bass management")
 
@@ -321,14 +304,6 @@ def process_club_ready(input_file: str, target: str = "club", bpm: float = None,
 
     print()
     print(f"  Output: {output_file}")
-    print()
-    print("  What was applied:")
-    print("    1. Mono bass (< 150 Hz) - prevents phase cancellation on club PAs")
-    print("    2. Corrective EQ - cut mud at 300Hz, tamed harshness at 3.5kHz")
-    print("    3. Glue compression (2:1, 30ms attack) - cohesion without killing dynamics")
-    print("    4. Tonal EQ - low-end warmth at 80Hz, air at 12kHz")
-    print("    5. Double saturation - analog warmth + grit (Summit's signature)")
-    print("    6. Brick-wall limiter at -1.0 dBTP")
 
 
 def main():

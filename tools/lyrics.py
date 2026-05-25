@@ -1,19 +1,4 @@
-"""
-OS Music Pipeline — Tool #4: Lyrics Generator
-Generate lyrics in the style of Drake, Weeknd, Nav, Don Toliver, Travis Scott, Kanye.
-Uses Claude API for generation with artist-specific style prompts.
-
-Usage:
-    python tools/lyrics.py --artist drake --mood introspective --topic "late night drive"
-    python tools/lyrics.py --artist weeknd --mood dark --topic "toxic love"
-    python tools/lyrics.py --artist nav --mood flexing --topic "came from nothing"
-    python tools/lyrics.py --artist travis --mood psychedelic --topic "rage"
-    python tools/lyrics.py --artist don-toliver --mood dreamy --topic "summer nights"
-    python tools/lyrics.py --artist kanye --mood confident --topic "self-made"
-    python tools/lyrics.py --artist om --mood all --topic "your story"  # YOUR style
-
-Set ANTHROPIC_API_KEY environment variable before running.
-"""
+"""Lyrics generation via Claude API with artist-specific style prompts."""
 
 import argparse
 import os
