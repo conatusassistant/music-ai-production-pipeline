@@ -84,6 +84,18 @@ def cmd_lyrics(args):
     generate_lyrics(args.artist, args.mood, args.topic, args.bars)
 
 
+def cmd_house(args):
+    from tools.house import print_structure, generate_beat, chop_vocal, cmd_full
+    if args.house_command == "structure":
+        print_structure(args.style, args.bpm)
+    elif args.house_command == "kick":
+        generate_beat(args.bpm, args.duration, args.style, args.output)
+    elif args.house_command == "chop":
+        chop_vocal(args.input, args.slices, args.output)
+    elif args.house_command == "full":
+        cmd_full(args.bpm, args.style, args.vocal)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="OS Music Pipeline — Your AI Producer",
@@ -146,6 +158,33 @@ Examples:
     sub_lyrics.add_argument("--topic", "-t", required=True, help="Song topic")
     sub_lyrics.add_argument("--bars", "-b", type=int, default=32)
 
+    # House
+    sub_house = subparsers.add_parser("house", help="House music production toolkit")
+    house_sub = sub_house.add_subparsers(dest="house_command")
+
+    hs_struct = house_sub.add_parser("structure", help="Print arrangement structure")
+    hs_struct.add_argument("--style", "-s", default="tech-house",
+                           choices=["tech-house", "deep-house", "bass-house"])
+    hs_struct.add_argument("--bpm", "-b", type=float, default=None)
+
+    hs_kick = house_sub.add_parser("kick", help="Generate kick + hat pattern")
+    hs_kick.add_argument("--bpm", "-b", type=float, default=126)
+    hs_kick.add_argument("--duration", "-d", type=float, default=30)
+    hs_kick.add_argument("--style", "-s", default="tech-house",
+                         choices=["tech-house", "deep-house", "bass-house"])
+    hs_kick.add_argument("--output", "-o", default=None)
+
+    hs_chop = house_sub.add_parser("chop", help="Chop vocals into rhythmic slices")
+    hs_chop.add_argument("input", help="Vocal file to chop")
+    hs_chop.add_argument("--slices", "-n", type=int, default=8)
+    hs_chop.add_argument("--output", "-o", default=None)
+
+    hs_full = house_sub.add_parser("full", help="Full demo: structure + beat + chops")
+    hs_full.add_argument("--bpm", "-b", type=float, default=126)
+    hs_full.add_argument("--style", "-s", default="tech-house",
+                         choices=["tech-house", "deep-house", "bass-house"])
+    hs_full.add_argument("--vocal", "-v", default=None)
+
     args = parser.parse_args()
 
     if args.command is None:
@@ -159,6 +198,7 @@ Examples:
         "analyze": cmd_analyze,
         "vocal": cmd_vocal,
         "lyrics": cmd_lyrics,
+        "house": cmd_house,
     }
 
     commands[args.command](args)
